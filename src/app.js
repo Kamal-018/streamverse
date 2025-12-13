@@ -1,0 +1,23 @@
+import express from "expres"
+import cors from "cords"
+import cookieParser from "cookie-parser"
+
+const app = express()
+
+app.use(cors ({
+    origin : process.env.CORS_ORIGIN,
+    Credential : true
+}))
+
+//limiter
+app.use(express.json({limit : "16kb"}))
+
+app.use(express.urlencoded({extended, limit : "16kb"}))
+
+//to store temp data
+app.use(express.static("public"))
+
+app.use(cookieParser())
+
+
+export {app}
