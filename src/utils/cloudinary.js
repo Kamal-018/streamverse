@@ -1,4 +1,4 @@
-import {v2 as cloudinary } from "clodinary"
+import { v2 as cloudinary } from "cloudinary"
 import fs from "fs"
 
 cloudinary.config ({
@@ -7,7 +7,7 @@ cloudinary.config ({
     api_secret : 'process.env.CLOUDINARY_API_SECRET'
 });
 
-const uploadOnClodinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath)  return null
         const response = await cloudinary.uploader.upload( localFilePath, {
@@ -25,4 +25,4 @@ const uploadOnClodinary = async (localFilePath) => {
     }
 }
 
-export {uploadOnClodinary}
+export { uploadOnCloudinary }
