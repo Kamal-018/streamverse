@@ -103,4 +103,41 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     .json(new Apiresponse(200, subscribedChannelList || {}, "Subscribed channel fetched successfully"))
 })
 
-export{getUserChannelSubscribers,getSubscribedChannels }
+//toggle feature for subscribed user
+
+const toggleSubscription = asyncHandler(async(req,res)=> {
+   
+   const { channelId } = req.params
+
+   if(!isValidObjectId(channelId)) {
+    throw new apierror(400, "invalid channel id")
+   }
+
+   const isSubscribed = await Subscription.findOne({
+
+    channel:channelId,
+    subscriber: req.user?._id
+ })
+
+ if (isSubscribed) {
+    await Subscription.findByIdAndDelete(isSubscribed._id)
+
+    return res
+    .status(200)
+    .json(200, {subscribed:false}, "unsubscribed")
+ }
+
+ await Subscription.create({
+
+    channel: channelId,
+    subscriber:user?._id
+ })
+
+ return res
+ .status(200)
+ .json(new ApiResponse(200, { subscribed: true }, "Subscribed"))
+})
+
+
+
+export{ getUserChannelSubscribers, getSubscribedChannels , toggleSubscription}

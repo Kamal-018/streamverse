@@ -169,10 +169,10 @@ const updateVideo = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(new Apiresponse(200, updatedVideo, "Video updated successfully"));
-});
+})
+
 
 //delete a video
-
 const deleteVideo = asyncHandler(async(req, res)=>{
    
     const { videoId } = req.params
@@ -199,4 +199,83 @@ const deleteVideo = asyncHandler(async(req, res)=>{
 })
 
 
-export {publishVideo,getVideoById, updateVideo, deleteVideo }
+//get video based on query or userid
+
+const getAllVideos = asyncHandler(async (req, res) => {
+
+    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+
+    const pipeline = [];
+
+    if (query) {
+        pipeline.push({
+            $match: {
+                $or: [
+                    { title: { $regex: query, $options: "i" } },
+                    { description: { $regex: query, $options: "i" } }
+                ]
+            }
+        });
+    }
+
+    if (userId) {
+        if (!isValidObjectId(userId)) {
+            throw new apierror(400, "Invalid User id");
+        }
+        pipeline.push({
+            $match: {
+                owner: new mongoose.Types.ObjectId(userId)
+            }
+        });
+    }
+
+    pipeline.push({ $match: { isPublished: true } });
+
+    const sortField = sortBy || "createdAt";
+    const sortOrder = sortType === "asc" ? 1 : -1;
+    
+    pipeline.push({
+        $sort: {
+            [sortField]: sortOrder
+        }
+    });
+
+    pipeline.push({
+        $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "ownerDetails",
+            pipeline: [
+                { $project: { username: 1, avatar: 1, fullName: 1 } }
+            ]
+        }
+    }, 
+    
+    { $unwind: "$ownerDetails" });
+
+    const options = {
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10)
+    };
+
+    const videoAggregate = Video.aggregate(pipeline);
+    const videos = await Video.aggregatePaginate(videoAggregate, options);
+
+    if (!videos || videos.docs.length === 0) {
+        return res
+        .status(200)
+        .json(new Apiresponse(200, [], "No videos found"));
+    }
+
+    return res
+    .status(200)
+    .json(new Apiresponse(200, videos, "Videos fetched successfully"));
+
+});
+
+
+
+
+
+export { publishVideo, getVideoById, updateVideo, deleteVideo, getAllVideos }
