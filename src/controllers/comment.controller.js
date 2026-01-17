@@ -30,7 +30,7 @@ const addComment = asyncHandler(async(req,res)=> {
 
     return res
     .status(200)
-    .json(200,comment,"comment added successfully")
+    .json(new Apiresponse(200,comment,"comment added successfully"))
 })
 
 const editComment = asyncHandler(async(req,res)=> {
@@ -44,13 +44,13 @@ const editComment = asyncHandler(async(req,res)=> {
     }
 
     if (!isValidObjectId(commentId)) {
-        throw new apierrorrror(400, "Invalid Comment ID");
+        throw new apierror(400, "Invalid Comment ID");
     }
 
     const comment = await Comment.findById(commentId);
 
     if (!comment) {
-        throw new ApiError(404, "Comment not found");
+        throw new apierror(404, "Comment not found");
     }
 
     if (comment.owner.toString() !== req.user?._id.toString()) {
@@ -69,7 +69,7 @@ const editComment = asyncHandler(async(req,res)=> {
 
      return res
     .status(200)
-    .json(new Apiresponse(200, editedCommentComment, "Comment updated successfully"));
+    .json(new Apiresponse(200, editedComment, "Comment updated successfully"));
 });
 
 const deleteComment = asyncHandler(async(req,res)=> {
@@ -82,19 +82,19 @@ const deleteComment = asyncHandler(async(req,res)=> {
 
    const comment = await Comment.findById(commentId)
 
-   if (comment.owner.toString() !== user.req?._id) {
+   if (comment.owner.toString() !== req.user?._id.toString()) {
     throw new apierror(403,"you dont have permission to delete this comment")
    }
 
    const deletedComment = await Comment.findByIdAndDelete(commentId)
 
-   if(!deleteComment) {
-    throw new apierror(504, " something went wrong while deleting comment")
+   if(!deletedComment) {
+    throw new apierror(500, "something went wrong while deleting comment")
    }
 
    return res
    .status(200)
-   .json(200, deleteComment, "comment deleted succesfully")
+   .json(new Apiresponse(200, deletedComment, "comment deleted successfully"))
 })
 
 const getVideoComments = asyncHandler(async (req, res) => {

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import {Video} from "../models/video.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Apiresponse } from "../utils/apiresponse.js"
@@ -6,7 +6,7 @@ import { apierror } from "../utils/apierror.js"
 import { uploadOnCloudinary , deleteOnCloudinary} from "../utils/cloudinary.js"
 
 //upload a video
-const publishVideo = asyncHandler(async(req,res)=> {
+const uploadVideo = asyncHandler(async(req,res)=> {
 
     const {title, description} = req.body
 
@@ -43,13 +43,15 @@ const publishVideo = asyncHandler(async(req,res)=> {
         description,
         videoFile: uploadVideo.url,
         thumbnail: uploadThumbnail.url,
-        duration: uploadVideo.duration
+        duration: uploadVideo.duration,
+        owner: req.user._id,
+        isPublished: true
 
     })
 
     return res 
     .status(200)
-    .json(new Apiresponse(200, "video uploaded succesfully"))
+    .json(new Apiresponse(200, video, "video uploaded succesfully"))
 
 })
 
@@ -278,4 +280,4 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
 
 
-export { publishVideo, getVideoById, updateVideo, deleteVideo, getAllVideos }
+export { uploadVideo, getVideoById, updateVideo, deleteVideo, getAllVideos }

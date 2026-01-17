@@ -1,8 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { apierror } from "../utils/apierror.js"
-import {User} from "../models/user.model.js"
-import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { Apiresponse } from "../utils/apiresponse.js"
+import { apierror } from "../utils/apierror.js"
+import { uploadOnCloudinary } from "../utils/cloudinary.js"
+
+import {User} from "../models/user.model.js"
+
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 
@@ -29,14 +31,12 @@ const registerUser = asyncHandler ( async (req , res) => {
 
   const {username, fullname, email, password}  =  req.body
    
-   //checking if all fields are used
    if (
     [fullname, email, username, password].some((field) => field?.trim() == "")
    ) {
     throw new apierror(400,"all fields are required")
    }
 
-// check if email or username already used 
    const existedUser = await User.findOne({
     $or: [{ username },{ email }]
    })
@@ -390,7 +390,7 @@ const watchHistory = asyncHandler(async(req,res) => {
 
     {
       $match: {
-        _id: new mongoose.Types.ObjectId(req.user._id)
+        _id: new mongoose.Types.ObjectId(req.user?._id)
       }
     },
     {
@@ -441,7 +441,13 @@ const watchHistory = asyncHandler(async(req,res) => {
 
 
 export { 
-  registerUser, loginUser , logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser,
-  updateUserDetails, updateAvatar, updateCover, getUserChannelProfile ,watchHistory
+
+  registerUser, loginUser , logOutUser, 
+  refreshAccessToken, 
+  changeCurrentPassword, 
+  getCurrentUser,
+  updateUserDetails, updateAvatar, updateCover, 
+  getUserChannelProfile ,
+  watchHistory
 
  }

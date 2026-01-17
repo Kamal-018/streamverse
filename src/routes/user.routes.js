@@ -37,6 +37,7 @@ router
 router
 .route("/change-password")
 .post(verifyJWT, changeCurrentPassword)
+
 router
 .route("/current-user")
 .get(verifyJWT, getCurrentUser)

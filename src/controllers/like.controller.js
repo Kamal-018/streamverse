@@ -1,5 +1,5 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { Like } from "../models/comment.model.js"
+import { Like } from "../models/like.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Apiresponse } from "../utils/apiresponse.js"
 import { apierror } from "../utils/apierror.js"
@@ -19,11 +19,11 @@ const toggleVideoLike = asyncHandler(async(req, res)=> {
 
    if(likedVideo) {
     //unliking the video
-    await Like.findbyIdAndDelete(likedVideo._id)
+    await Like.findByIdAndDelete(likedVideo._id)
 
     return res 
     .status(200)
-    .json(200, {isliked: false}, "video unliked")
+    .json(new Apiresponse(200, {isLiked: false}, "Video unliked"))
    }
 
    //like the video
@@ -35,7 +35,7 @@ const toggleVideoLike = asyncHandler(async(req, res)=> {
 
    return res
    .status(200)
-   .json(200, { isliked: true}, "video liked successfully")
+   .json(new Apiresponse(200, {isLiked: true}, "Video liked successfully"))
 })
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
