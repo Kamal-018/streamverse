@@ -1,8 +1,8 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Comment } from "../models/comment.model.js"
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { Apiresponse } from "../utils/apiresponse.js"
-import { apierror } from "../utils/apierror.js"
+import { asyncHandler } from "../utils/async_handler.js";
+import { Apiresponse } from "../utils/api_response.js"
+import { apierror } from "../utils/api_error.js"
 
 
 const addComment = asyncHandler(async (req, res) => {
