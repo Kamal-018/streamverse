@@ -9,14 +9,21 @@ dotenv.config({
 })
 
 
+import fs from "fs"
+
+const tempDir = "./public/temp";
+if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+}
+
 connectDB()
 
-.then(() => {
+    .then(() => {
         app.listen(process.env.PORT || 8000, () => {
-        console.log(`server is running at port : ${process.env.PORT}`)
+            console.log(`server is running at port : ${process.env.PORT}`)
+        })
     })
-})
 
-.catch((err) => {
-    console.log("mongodb connection failed", err)
-})
+    .catch((err) => {
+        console.log("mongodb connection failed", err)
+    })
