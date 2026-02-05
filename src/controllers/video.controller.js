@@ -50,9 +50,15 @@ const uploadVideo = asyncHandler(async (req, res) => {
 
     })
 
+    // Populate owner details before returning
+    const populatedVideo = await Video.findById(video._id).populate({
+        path: 'owner',
+        select: 'username fullname avatar email'
+    });
+
     return res
         .status(200)
-        .json(new Apiresponse(200, video, "video uploaded succesfully"))
+        .json(new Apiresponse(200, populatedVideo, "video uploaded succesfully"))
 
 })
 
@@ -64,17 +70,26 @@ const getVideoById = asyncHandler(async (req, res) => {
         throw new apierror(400, "Invalid Video ID");
     }
 
-    const user = await User.findById(req.user._id);
+    // Optional view increment and watch history tracking
+    if (req.user) {
+        const user = await User.findById(req.user._id);
+        // Convert ObjectIds to strings for proper comparison
+        const watchedVideoIds = user.watchHistory.map(id => id.toString());
+        const isWatched = watchedVideoIds.includes(videoId);
 
-    const isWatched = user.watchHistory.includes(videoId);
+        if (!isWatched) {
+            await Video.findByIdAndUpdate(videoId, {
+                $inc: { views: 1 }
+            });
 
-    if (!isWatched) {
+            await User.findByIdAndUpdate(req.user._id, {
+                $addToSet: { watchHistory: videoId }
+            });
+        }
+    } else {
+        // Increment views for anonymous users too
         await Video.findByIdAndUpdate(videoId, {
             $inc: { views: 1 }
-        });
-
-        await User.findByIdAndUpdate(req.user._id, {
-            $addToSet: { watchHistory: videoId }
         });
     }
 
@@ -262,7 +277,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
             foreignField: "_id",
             as: "ownerDetails",
             pipeline: [
-                { $project: { username: 1, avatar: 1, fullName: 1 } }
+                { $project: { username: 1, avatar: 1, fullname: 1 } }
             ]
         }
     },

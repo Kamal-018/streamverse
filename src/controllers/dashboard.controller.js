@@ -37,12 +37,12 @@ const getChannelStats = asyncHandler(async (req, res) => {
         {
             $lookup: {
                 from: "subscriptions",
-                localField: "owner", 
+                localField: "owner",
                 foreignField: "channel",
                 as: "subscribers"
             }
         }
-       
+
     ])
 
     const totalSubscribers = await Subscription.countDocuments({ channel: userId })

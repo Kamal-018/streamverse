@@ -5,13 +5,13 @@ import { Apiresponse } from "../utils/apiresponse.js"
 import { apierror } from "../utils/apierror.js"
 
 
-const addComment = asyncHandler(async(req,res)=> {
+const addComment = asyncHandler(async (req, res) => {
 
     const { videoId } = req.params
     const { content } = req.body
 
-    if(!isValidObjectId(videoId)) {
-        throw new apierror(400,"videoid not valid")
+    if (!isValidObjectId(videoId)) {
+        throw new apierror(400, "videoid not valid")
     }
 
     if (!content || content.trim() === "") {
@@ -20,20 +20,22 @@ const addComment = asyncHandler(async(req,res)=> {
 
     const comment = await Comment.create({
         content,
-        video:videoId,
-        owner:req.user?._id
+        video: videoId,
+        owner: req.user?._id
     })
 
-    if(!comment) {
+    if (!comment) {
         throw new apierror(500, "something went wrong while adding the comment")
     }
 
+    const populatedComment = await Comment.findById(comment._id).populate("owner", "username fullname avatar");
+
     return res
-    .status(200)
-    .json(new Apiresponse(200,comment,"comment added successfully"))
+        .status(200)
+        .json(new Apiresponse(200, populatedComment, "comment added successfully"))
 })
 
-const editComment = asyncHandler(async(req,res)=> {
+const editComment = asyncHandler(async (req, res) => {
 
     const { commentId } = req.params;
     const { content } = req.body;
@@ -64,37 +66,37 @@ const editComment = asyncHandler(async(req,res)=> {
                 content: content
             }
         },
-        { new: true } 
+        { new: true }
     );
 
-     return res
-    .status(200)
-    .json(new Apiresponse(200, editedComment, "Comment updated successfully"));
+    return res
+        .status(200)
+        .json(new Apiresponse(200, editedComment, "Comment updated successfully"));
 });
 
-const deleteComment = asyncHandler(async(req,res)=> {
+const deleteComment = asyncHandler(async (req, res) => {
 
-   const { commentId } = req.params
+    const { commentId } = req.params
 
-   if (!isValidObjectId(commentId)) {
-    throw new apierror(400, "not a valid comment ID")
-   }
+    if (!isValidObjectId(commentId)) {
+        throw new apierror(400, "not a valid comment ID")
+    }
 
-   const comment = await Comment.findById(commentId)
+    const comment = await Comment.findById(commentId)
 
-   if (comment.owner.toString() !== req.user?._id.toString()) {
-    throw new apierror(403,"you dont have permission to delete this comment")
-   }
+    if (comment.owner.toString() !== req.user?._id.toString()) {
+        throw new apierror(403, "you dont have permission to delete this comment")
+    }
 
-   const deletedComment = await Comment.findByIdAndDelete(commentId)
+    const deletedComment = await Comment.findByIdAndDelete(commentId)
 
-   if(!deletedComment) {
-    throw new apierror(500, "something went wrong while deleting comment")
-   }
+    if (!deletedComment) {
+        throw new apierror(500, "something went wrong while deleting comment")
+    }
 
-   return res
-   .status(200)
-   .json(new Apiresponse(200, deletedComment, "comment deleted successfully"))
+    return res
+        .status(200)
+        .json(new Apiresponse(200, deletedComment, "comment deleted successfully"))
 })
 
 const getVideoComments = asyncHandler(async (req, res) => {
@@ -141,17 +143,17 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
     const comments = await Comment.aggregatePaginate(aggregate, options);
 
-    if(!comments) {
+    if (!comments) {
         throw new apierror(501, "problem during fetching comments")
     }
 
     return res
-    .status(200)
-    .json(new Apiresponse(200, comments, "Comments fetched successfully"));
+        .status(200)
+        .json(new Apiresponse(200, comments, "Comments fetched successfully"));
 
 });
 
-export { addComment, editComment, deleteComment, getVideoComments}
-    
+export { addComment, editComment, deleteComment, getVideoComments }
+
 
 
